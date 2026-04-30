@@ -1,42 +1,55 @@
 import { Task, Priority } from "../types/task";
 
-let memoryTasks: Task[] = [];
-let nextId = 1;
+const STORAGE_KEY = "productivity_tasks";
 
-export async function initDB(): Promise<void> {
-  return;
+function load(): Task[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function save(tasks: Task[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
 }
 
 export async function getTasks(): Promise<Task[]> {
-  return memoryTasks
-    .slice()
-    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  return load().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
 export async function addTask(
   title: string,
   description: string,
-  priority: Priority
+  priority: Priority,
+  dueDate: string
 ): Promise<void> {
-  const createdAt = new Date().toISOString();
+  const tasks = load();
 
-  memoryTasks.push({
-    id: nextId++,
+  const newTask: Task = {
+    id: Date.now(),
     title,
     description,
     priority,
     completed: false,
-    createdAt,
-  });
+    dueDate,
+    createdAt: new Date().toISOString(),
+  };
+
+  tasks.unshift(newTask);
+  save(tasks);
 }
 
 export async function toggleTaskCompleted(
   id: number,
   completed: boolean
 ): Promise<void> {
-  memoryTasks = memoryTasks.map((t) => (t.id === id ? { ...t, completed } : t));
+  const tasks = load().map((t) => (t.id === id ? { ...t, completed } : t));
+  save(tasks);
 }
 
 export async function deleteTask(id: number): Promise<void> {
-  memoryTasks = memoryTasks.filter((t) => t.id !== id);
+  const tasks = load().filter((t) => t.id !== id);
+  save(tasks);
 }

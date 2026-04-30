@@ -67,23 +67,25 @@ export default function TaskListScreen() {
 
   const total = tasks.length;
   const completed = tasks.filter((t) => t.completed).length;
+  const active = total - completed;
+  const completionRate =
+    total === 0 ? 0 : Math.round((completed / total) * 100);
 
   const bgStyle = isDark ? styles.containerDark : styles.containerLight;
-  const headerTextStyle = isDark
-    ? styles.headerTextDark
-    : styles.headerTextLight;
-  const subTextStyle = isDark ? styles.subTextDark : styles.subTextLight;
+  const titleStyle = isDark ? styles.titleDark : styles.titleLight;
+  const textStyle = isDark ? styles.textDark : styles.textLight;
+  const cardStyle = isDark ? styles.summaryCardDark : styles.summaryCardLight;
 
   return (
     <View style={bgStyle}>
-      {/* Top buttons */}
-      <View style={styles.topRow}>
-        <TouchableOpacity
-          onPress={() => router.push("/add-task")}
-          style={styles.addButton}
-        >
-          <Text style={styles.addButtonText}>+ Add Task</Text>
-        </TouchableOpacity>
+      <View style={styles.hero}>
+        <View>
+          <Text style={styles.kicker}>Productivity System</Text>
+          <Text style={titleStyle}>Today’s Tasks</Text>
+          <Text style={textStyle}>
+            {active} active • {completed} completed
+          </Text>
+        </View>
 
         <TouchableOpacity
           onPress={() => router.push("/settings")}
@@ -93,15 +95,32 @@ export default function TaskListScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Header + stats */}
-      <View style={styles.headerBlock}>
-        <Text style={headerTextStyle}>Productivity Tasks</Text>
-        <Text style={subTextStyle}>
-          Total: {total} • Completed: {completed}
-        </Text>
+      <View style={styles.summaryGrid}>
+        <View style={[styles.summaryCard, cardStyle]}>
+          <Text style={styles.summaryNumber}>{total}</Text>
+          <Text style={textStyle}>Total</Text>
+        </View>
+
+        <View style={[styles.summaryCard, cardStyle]}>
+          <Text style={styles.summaryNumber}>{active}</Text>
+          <Text style={textStyle}>Active</Text>
+        </View>
+
+        <View style={[styles.summaryCard, cardStyle]}>
+          <Text style={styles.summaryNumber}>{completionRate}%</Text>
+          <Text style={textStyle}>Done</Text>
+        </View>
       </View>
 
-      {/* Filter buttons */}
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          onPress={() => router.push("/add-task")}
+          style={styles.addButton}
+        >
+          <Text style={styles.addButtonText}>+ Add Task</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.filterRow}>
         <FilterChip
           label="All"
@@ -120,15 +139,16 @@ export default function TaskListScreen() {
         />
       </View>
 
-      {/* Task list */}
       {loading && total === 0 ? (
         <View style={styles.center}>
           <ActivityIndicator />
-          <Text style={subTextStyle}>Loading tasks...</Text>
+          <Text style={textStyle}>Loading tasks...</Text>
         </View>
       ) : filteredTasks.length === 0 ? (
         <View style={styles.center}>
-          <Text style={subTextStyle}>No tasks yet. We’ll add some next.</Text>
+          <Text style={[textStyle, styles.emptyText]}>
+            No tasks here yet. Add one to start building momentum.
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -141,6 +161,8 @@ export default function TaskListScreen() {
               onDelete={() => handleDelete(item)}
             />
           )}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -190,67 +212,104 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     backgroundColor: "#e5e7eb",
   },
-  topRow: {
+  hero: {
     flexDirection: "row",
+    alignItems: "flex-start",
     justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 18,
+  },
+  kicker: {
+    color: "#0ea5e9",
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    marginBottom: 4,
+  },
+  titleDark: {
+    fontSize: 30,
+    fontWeight: "900",
+    color: "#f8fafc",
+  },
+  titleLight: {
+    fontSize: 30,
+    fontWeight: "900",
+    color: "#111827",
+  },
+  textDark: {
+    fontSize: 13,
+    color: "#94a3b8",
+  },
+  textLight: {
+    fontSize: 13,
+    color: "#4b5563",
+  },
+  settingsButton: {
+    backgroundColor: "#020617",
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  settingsButtonText: {
+    color: "#e5e7eb",
+    fontSize: 13,
+    fontWeight: "800",
+  },
+  summaryGrid: {
+    flexDirection: "row",
+    gap: 10,
     marginBottom: 16,
+  },
+  summaryCard: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+  },
+  summaryCardDark: {
+    backgroundColor: "#0f172a",
+    borderColor: "#1e293b",
+  },
+  summaryCardLight: {
+    backgroundColor: "#ffffff",
+    borderColor: "#d1d5db",
+  },
+  summaryNumber: {
+    color: "#0ea5e9",
+    fontSize: 24,
+    fontWeight: "900",
+    marginBottom: 2,
+  },
+  actionRow: {
+    marginBottom: 14,
   },
   addButton: {
     backgroundColor: "#0ea5e9",
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 14,
+    alignItems: "center",
   },
   addButtonText: {
     color: "#f9fafb",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  settingsButton: {
-    backgroundColor: "#020617",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#4b5563",
-  },
-  settingsButtonText: {
-    color: "#e5e7eb",
-    fontSize: 14,
-  },
-  headerBlock: {
-    marginBottom: 12,
-  },
-  headerTextDark: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#f9fafb",
-  },
-  headerTextLight: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  subTextDark: {
-    fontSize: 13,
-    color: "#9ca3af",
-  },
-  subTextLight: {
-    fontSize: 13,
-    color: "#4b5563",
+    fontWeight: "900",
+    fontSize: 15,
   },
   filterRow: {
     flexDirection: "row",
     marginBottom: 16,
+    gap: 8,
   },
   filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 13,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#4b5563",
+    borderColor: "#475569",
     backgroundColor: "#020617",
-    marginRight: 8,
   },
   filterChipActive: {
     backgroundColor: "#0ea5e9",
@@ -258,15 +317,23 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: "500",
-    color: "#cbd5f5",
+    fontWeight: "800",
+    color: "#cbd5e1",
   },
   filterChipTextActive: {
-    color: "#f9fafb",
+    color: "#ffffff",
+  },
+  listContent: {
+    paddingBottom: 40,
   },
   center: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  emptyText: {
+    textAlign: "center",
+    maxWidth: 280,
+    lineHeight: 20,
   },
 });

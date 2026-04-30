@@ -22,16 +22,20 @@ async function getDb() {
             description TEXT,
             priority TEXT NOT NULL,
             completed INTEGER NOT NULL,
+            due_date TEXT,
             created_at TEXT NOT NULL
           );
         `);
 
+        try {
+          await db.execAsync(`ALTER TABLE tasks ADD COLUMN due_date TEXT;`);
+        } catch {
+          // column already exists
+        }
+
         return db;
       } catch (e) {
-        console.warn(
-          "SQLite failed to open, using in-memory tasks instead.",
-          e
-        );
+        console.warn("SQLite failed, using memory fallback.", e);
         useMemory = true;
         return null;
       }
@@ -45,7 +49,6 @@ export async function getTasks(): Promise<Task[]> {
   const db = await getDb();
 
   if (!db) {
-    // in-memory fallback
     return [...memoryTasks].sort((a, b) =>
       a.createdAt < b.createdAt ? 1 : -1
     );
@@ -61,6 +64,7 @@ export async function getTasks(): Promise<Task[]> {
     description: row.description ?? "",
     priority: row.priority as Priority,
     completed: row.completed === 1,
+    dueDate: row.due_date ?? "",
     createdAt: row.created_at,
   }));
 }
@@ -68,27 +72,28 @@ export async function getTasks(): Promise<Task[]> {
 export async function addTask(
   title: string,
   description: string,
-  priority: Priority
+  priority: Priority,
+  dueDate: string
 ): Promise<void> {
   const createdAt = new Date().toISOString();
   const db = await getDb();
 
   if (!db) {
-    // in-memory
     memoryTasks.unshift({
       id: nextId++,
       title,
       description,
       priority,
       completed: false,
+      dueDate,
       createdAt,
     });
     return;
   }
 
   await db.runAsync(
-    "INSERT INTO tasks (title, description, priority, completed, created_at) VALUES (?, ?, ?, ?, ?);",
-    [title, description, priority, 0, createdAt]
+    "INSERT INTO tasks (title, description, priority, completed, due_date, created_at) VALUES (?, ?, ?, ?, ?, ?);",
+    [title, description, priority, 0, dueDate, createdAt]
   );
 }
 

@@ -6,5 +6,6 @@ export type Task = {
   description: string;
   priority: Priority;
   completed: boolean;
+  dueDate: string;
   createdAt: string;
 };

@@ -16,50 +16,27 @@ function priorityLabel(p: Priority) {
 }
 
 function priorityColor(p: Priority) {
-  switch (p) {
-    case "high":
-      return "#f97316";
-    case "medium":
-      return "#22c55e";
-    case "low":
-    default:
-      return "#38bdf8";
-  }
+  if (p === "high") return "#f97316";
+  if (p === "medium") return "#eab308";
+  return "#38bdf8";
+}
+
+function formatDueDate(date: string) {
+  if (!date) return "No due date";
+
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return date;
+
+  return parsed.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default function TaskItem({ task, onToggle, onDelete }: Props) {
   const { theme } = useAppTheme();
   const isDark = theme === "dark";
-
-  const containerStyle = [
-    styles.container,
-    isDark ? styles.containerDark : styles.containerLight,
-    task.completed && styles.containerCompleted,
-  ];
-
-  const titleStyle = [
-    styles.title,
-    isDark ? styles.titleDark : styles.titleLight,
-    task.completed && styles.titleCompleted,
-  ];
-
-  const descStyle = [
-    styles.description,
-    isDark ? styles.descDark : styles.descLight,
-  ];
-
-  const statusStyle = [
-    styles.statusText,
-    isDark ? styles.statusDark : styles.statusLight,
-  ];
-
-  const badgeStyle = [
-    styles.priorityBadge,
-    {
-      borderColor: priorityColor(task.priority),
-      backgroundColor: isDark ? "#020617" : "#e5e7eb",
-    },
-  ];
 
   function handleDelete() {
     Alert.alert("Delete task", "Are you sure you want to delete this task?", [
@@ -69,23 +46,69 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
   }
 
   return (
-    <View style={containerStyle}>
+    <View
+      style={[
+        styles.card,
+        isDark ? styles.cardDark : styles.cardLight,
+        task.completed && styles.cardCompleted,
+      ]}
+    >
+      <TouchableOpacity onPress={onToggle} style={styles.checkboxWrap}>
+        <View
+          style={[styles.checkbox, task.completed && styles.checkboxChecked]}
+        >
+          {task.completed && <Text style={styles.checkmark}>✓</Text>}
+        </View>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={onToggle} style={styles.content}>
-        <Text style={titleStyle}>{task.title}</Text>
+        <View style={styles.titleRow}>
+          <Text
+            style={[
+              styles.title,
+              isDark ? styles.titleDark : styles.titleLight,
+              task.completed && styles.titleCompleted,
+            ]}
+            numberOfLines={1}
+          >
+            {task.title}
+          </Text>
+
+          <View
+            style={[
+              styles.priorityBadge,
+              { borderColor: priorityColor(task.priority) },
+            ]}
+          >
+            <Text
+              style={[
+                styles.priorityText,
+                { color: priorityColor(task.priority) },
+              ]}
+            >
+              {priorityLabel(task.priority)}
+            </Text>
+          </View>
+        </View>
+
         {task.description ? (
-          <Text style={descStyle} numberOfLines={2}>
+          <Text
+            style={[
+              styles.description,
+              isDark ? styles.descDark : styles.descLight,
+            ]}
+            numberOfLines={2}
+          >
             {task.description}
           </Text>
         ) : null}
 
         <View style={styles.metaRow}>
-          <View style={badgeStyle}>
-            <Text style={styles.priorityText}>
-              {priorityLabel(task.priority)}
-            </Text>
-          </View>
+          <Text style={isDark ? styles.metaDark : styles.metaLight}>
+            Due: {formatDueDate(task.dueDate)}
+          </Text>
 
-          <Text style={statusStyle}>
+          <Text style={isDark ? styles.metaDark : styles.metaLight}>
             {task.completed ? "Completed" : "Active"}
           </Text>
         </View>
@@ -99,37 +122,65 @@ export default function TaskItem({ task, onToggle, onDelete }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 10,
+  card: {
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 12,
     flexDirection: "row",
     alignItems: "flex-start",
-  },
-  containerDark: {
-    backgroundColor: "#020617",
     borderWidth: 1,
-    borderColor: "#1f2937",
   },
-  containerLight: {
+  cardDark: {
+    backgroundColor: "#0f172a",
+    borderColor: "#1e293b",
+  },
+  cardLight: {
     backgroundColor: "#ffffff",
-    borderWidth: 1,
     borderColor: "#d1d5db",
   },
-  containerCompleted: {
-    opacity: 0.6,
+  cardCompleted: {
+    opacity: 0.65,
+  },
+  checkboxWrap: {
+    paddingTop: 2,
+    marginRight: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#475569",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#0ea5e9",
+    borderColor: "#38bdf8",
+  },
+  checkmark: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontWeight: "900",
   },
   content: {
     flex: 1,
-    marginRight: 8,
+    minWidth: 0,
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 6,
   },
   title: {
+    flex: 1,
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
+    fontWeight: "800",
   },
   titleDark: {
-    color: "#f9fafb",
+    color: "#f8fafc",
   },
   titleLight: {
     color: "#111827",
@@ -139,47 +190,48 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    marginBottom: 8,
+    lineHeight: 18,
+    marginBottom: 10,
   },
   descDark: {
-    color: "#9ca3af",
+    color: "#94a3b8",
   },
   descLight: {
     color: "#4b5563",
   },
-  metaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
   priorityBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
   },
   priorityText: {
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  metaDark: {
+    color: "#64748b",
     fontSize: 12,
     fontWeight: "600",
-    color: "#f9fafb",
   },
-  statusText: {
+  metaLight: {
+    color: "#6b7280",
     fontSize: 12,
-  },
-  statusDark: {
-    color: "#9ca3af",
-  },
-  statusLight: {
-    color: "#4b5563",
+    fontWeight: "600",
   },
   deleteButton: {
-    paddingHorizontal: 8,
+    marginLeft: 10,
+    paddingHorizontal: 6,
     paddingVertical: 4,
-    alignSelf: "center",
   },
   deleteText: {
     fontSize: 12,
-    color: "#f97373",
-    fontWeight: "600",
+    color: "#fb7185",
+    fontWeight: "800",
   },
 });

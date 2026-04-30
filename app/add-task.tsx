@@ -18,9 +18,12 @@ const PRIORITY_OPTIONS: Priority[] = ["high", "medium", "low"];
 export default function AddTaskScreen() {
   const { theme } = useAppTheme();
   const isDark = theme === "dark";
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<Priority>("low");
+  const [priority, setPriority] = useState<Priority>("medium");
+  const [dueDate, setDueDate] = useState("");
+
   const router = useRouter();
 
   const handleSave = async () => {
@@ -30,8 +33,8 @@ export default function AddTaskScreen() {
     }
 
     try {
-      await addTask(title, description, priority);
-      Alert.alert("Success", "Task added successfully!");
+      await addTask(title.trim(), description.trim(), priority, dueDate.trim());
+
       router.back();
     } catch (err) {
       console.error(err);
@@ -42,7 +45,7 @@ export default function AddTaskScreen() {
   return (
     <ScrollView
       style={isDark ? styles.containerDark : styles.containerLight}
-      contentContainerStyle={{ padding: 20 }}
+      contentContainerStyle={styles.content}
     >
       <Text style={isDark ? styles.titleDark : styles.titleLight}>
         Add New Task
@@ -52,7 +55,7 @@ export default function AddTaskScreen() {
       <TextInput
         value={title}
         onChangeText={setTitle}
-        placeholder="Enter task title"
+        placeholder="Example: Finish portfolio update"
         placeholderTextColor="#9ca3af"
         style={isDark ? styles.inputDark : styles.inputLight}
       />
@@ -73,11 +76,24 @@ export default function AddTaskScreen() {
       />
 
       <Text style={isDark ? styles.labelDark : styles.labelLight}>
+        Due Date
+      </Text>
+      <TextInput
+        value={dueDate}
+        onChangeText={setDueDate}
+        placeholder="Example: 2026-05-01"
+        placeholderTextColor="#9ca3af"
+        style={isDark ? styles.inputDark : styles.inputLight}
+      />
+
+      <Text style={isDark ? styles.labelDark : styles.labelLight}>
         Priority
       </Text>
+
       <View style={styles.priorityRow}>
         {PRIORITY_OPTIONS.map((p) => {
           const active = p === priority;
+
           return (
             <TouchableOpacity
               key={p}
@@ -113,60 +129,67 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#e5e7eb",
   },
+  content: {
+    padding: 20,
+  },
   titleDark: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 26,
+    fontWeight: "900",
     color: "#f9fafb",
-    marginBottom: 16,
+    marginBottom: 22,
   },
   titleLight: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 26,
+    fontWeight: "900",
     color: "#111827",
-    marginBottom: 16,
+    marginBottom: 22,
   },
   labelDark: {
     color: "#e5e7eb",
-    marginBottom: 4,
+    marginBottom: 6,
+    fontWeight: "700",
   },
   labelLight: {
     color: "#374151",
-    marginBottom: 4,
+    marginBottom: 6,
+    fontWeight: "700",
   },
   inputDark: {
-    backgroundColor: "#020617",
+    backgroundColor: "#0f172a",
     color: "#f9fafb",
-    padding: 12,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#4b5563",
-    marginBottom: 12,
+    borderColor: "#334155",
+    marginBottom: 16,
+    fontSize: 16,
   },
   inputLight: {
     backgroundColor: "#ffffff",
     color: "#111827",
-    padding: 12,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#9ca3af",
-    marginBottom: 12,
+    borderColor: "#cbd5e1",
+    marginBottom: 16,
+    fontSize: 16,
   },
   multiline: {
-    minHeight: 80,
+    minHeight: 90,
     textAlignVertical: "top",
   },
   priorityRow: {
     flexDirection: "row",
-    marginBottom: 24,
+    marginBottom: 28,
+    gap: 8,
   },
   priorityChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#4b5563",
+    borderColor: "#475569",
     backgroundColor: "#020617",
-    marginRight: 8,
   },
   priorityChipActive: {
     backgroundColor: "#0ea5e9",
@@ -174,22 +197,23 @@ const styles = StyleSheet.create({
   },
   priorityChipText: {
     fontSize: 13,
-    color: "#cbd5f5",
+    color: "#cbd5e1",
+    fontWeight: "700",
   },
   priorityChipTextActive: {
-    color: "#f9fafb",
-    fontWeight: "600",
+    color: "#ffffff",
+    fontWeight: "900",
   },
   saveButton: {
     backgroundColor: "#0ea5e9",
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: "center",
     marginBottom: 40,
   },
   saveButtonText: {
     color: "#ffffff",
-    fontWeight: "600",
+    fontWeight: "900",
     fontSize: 16,
   },
 });
