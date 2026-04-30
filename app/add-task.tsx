@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  View,
   Text,
   TextInput,
   TouchableOpacity,
@@ -15,27 +14,54 @@ import { useAppTheme } from "./_layout";
 
 const PRIORITY_OPTIONS: Priority[] = ["high", "medium", "low"];
 
+function isValidDateString(value: string) {
+  if (!value) return true;
+
+  const pattern = /^\d{4}-\d{2}-\d{2}$/;
+  if (!pattern.test(value)) return false;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
 export default function AddTaskScreen() {
   const { theme } = useAppTheme();
   const isDark = theme === "dark";
+  const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
+  const [priority, setPriority] = useState<Priority>("low");
   const [dueDate, setDueDate] = useState("");
 
-  const router = useRouter();
-
   const handleSave = async () => {
-    if (!title.trim()) {
+    const cleanTitle = title.trim();
+    const cleanDescription = description.trim();
+    const cleanDueDate = dueDate.trim();
+
+    if (!cleanTitle) {
       Alert.alert("Missing title", "Please enter a task title.");
       return;
     }
 
-    try {
-      await addTask(title.trim(), description.trim(), priority, dueDate.trim());
+    if (!isValidDateString(cleanDueDate)) {
+      Alert.alert(
+        "Invalid date",
+        "Use format YYYY-MM-DD, for example: 2026-05-01."
+      );
+      return;
+    }
 
-      router.back();
+    try {
+      await addTask(cleanTitle, cleanDescription, priority, cleanDueDate);
+
+      router.replace("/");
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Could not save task.");
@@ -55,7 +81,7 @@ export default function AddTaskScreen() {
       <TextInput
         value={title}
         onChangeText={setTitle}
-        placeholder="Example: Finish portfolio update"
+        placeholder="Enter task title"
         placeholderTextColor="#9ca3af"
         style={isDark ? styles.inputDark : styles.inputLight}
       />
@@ -76,12 +102,12 @@ export default function AddTaskScreen() {
       />
 
       <Text style={isDark ? styles.labelDark : styles.labelLight}>
-        Due Date
+        Due Date (YYYY-MM-DD)
       </Text>
       <TextInput
         value={dueDate}
         onChangeText={setDueDate}
-        placeholder="Example: 2026-05-01"
+        placeholder="2026-05-01"
         placeholderTextColor="#9ca3af"
         style={isDark ? styles.inputDark : styles.inputLight}
       />
@@ -90,7 +116,11 @@ export default function AddTaskScreen() {
         Priority
       </Text>
 
-      <View style={styles.priorityRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.priorityRow}
+      >
         {PRIORITY_OPTIONS.map((p) => {
           const active = p === priority;
 
@@ -111,7 +141,7 @@ export default function AddTaskScreen() {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
         <Text style={styles.saveButtonText}>Save Task</Text>
@@ -125,95 +155,108 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#020617",
   },
+
   containerLight: {
     flex: 1,
     backgroundColor: "#e5e7eb",
   },
+
   content: {
     padding: 20,
   },
+
   titleDark: {
-    fontSize: 26,
-    fontWeight: "900",
+    fontSize: 22,
+    fontWeight: "700",
     color: "#f9fafb",
-    marginBottom: 22,
+    marginBottom: 16,
   },
+
   titleLight: {
-    fontSize: 26,
-    fontWeight: "900",
+    fontSize: 22,
+    fontWeight: "700",
     color: "#111827",
-    marginBottom: 22,
+    marginBottom: 16,
   },
+
   labelDark: {
     color: "#e5e7eb",
-    marginBottom: 6,
-    fontWeight: "700",
+    marginBottom: 4,
   },
+
   labelLight: {
     color: "#374151",
-    marginBottom: 6,
-    fontWeight: "700",
+    marginBottom: 4,
   },
+
   inputDark: {
-    backgroundColor: "#0f172a",
+    backgroundColor: "#020617",
     color: "#f9fafb",
-    padding: 14,
-    borderRadius: 14,
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#334155",
-    marginBottom: 16,
+    borderColor: "#4b5563",
+    marginBottom: 12,
     fontSize: 16,
   },
+
   inputLight: {
     backgroundColor: "#ffffff",
     color: "#111827",
-    padding: 14,
-    borderRadius: 14,
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
-    marginBottom: 16,
+    borderColor: "#9ca3af",
+    marginBottom: 12,
     fontSize: 16,
   },
+
   multiline: {
-    minHeight: 90,
+    minHeight: 80,
     textAlignVertical: "top",
   },
+
   priorityRow: {
     flexDirection: "row",
-    marginBottom: 28,
     gap: 8,
+    paddingBottom: 24,
   },
+
   priorityChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#475569",
+    borderColor: "#4b5563",
     backgroundColor: "#020617",
   },
+
   priorityChipActive: {
     backgroundColor: "#0ea5e9",
     borderColor: "#38bdf8",
   },
+
   priorityChipText: {
     fontSize: 13,
-    color: "#cbd5e1",
-    fontWeight: "700",
+    color: "#cbd5f5",
   },
+
   priorityChipTextActive: {
-    color: "#ffffff",
-    fontWeight: "900",
+    color: "#f9fafb",
+    fontWeight: "600",
   },
+
   saveButton: {
     backgroundColor: "#0ea5e9",
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: "center",
     marginBottom: 40,
   },
+
   saveButtonText: {
     color: "#ffffff",
-    fontWeight: "900",
+    fontWeight: "600",
     fontSize: 16,
   },
 });
