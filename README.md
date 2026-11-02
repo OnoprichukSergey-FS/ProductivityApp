@@ -1,59 +1,67 @@
-# 🧠 Productivity Dashboard
 
-A clean and modern productivity dashboard built with React and TypeScript.  
-This application helps users manage tasks, stay organized, and maintain focus with a simple and intuitive UI.
+# ProductivityApp — Task Management Application
 
----
+A cross-platform productivity application built with React Native, Expo, and TypeScript. The app helps users organize daily tasks, manage priorities, track completion, and stay focused through a clean, user-friendly interface.
 
-## 🚀 Live Demo
-👉 https://sergey-productivity-dashboard.netlify.app/
+## Features
 
----
+- Create tasks with titles, descriptions, priorities, and due dates
+- Mark tasks as completed or active
+- Delete tasks
+- Filter tasks by All, Active, and Completed
+- View task statistics and completion progress
+- Store task data locally
+- Navigate between task management and settings screens
+- Support web, iOS, and Android through Expo
 
-## 📌 Features
+## Tech Stack
 
-- 📅 Task organization with clear layout
-- 🎯 Simple and focused UI design
-- 📱 Fully responsive (desktop + mobile)
-- ⚡ Fast performance with Vite
+- **React Native** — Cross-platform user interface
+- **Expo** — Development tooling and platform support
+- **Expo Router** — File-based navigation
+- **TypeScript** — Type-safe application development
+- **NativeWind / Tailwind CSS** — Styling
+- **Expo SQLite** — Local database storage on supported native platforms
+- **Browser localStorage** — Task persistence on the web
 
----
+## Project Structure
 
-## 🛠️ Tech Stack
-
-- React
-- TypeScript
-- Tailwind CSS
-- Vite
-- Netlify (Deployment)
-
----
-
-## 📂 Project Structure
-
-```
+```text
 app/
+  _layout.tsx
+  index.tsx
+  add-task.tsx
+  settings.tsx
+
 components/
+  TaskItem.tsx
+
 services/
+  db.ts
+  db.web.ts
+  settings.ts
+
 types/
+  task.ts
+
 assets/
-public/
 ```
 
----
+## How It Works
 
-## 🧩 How It Works
+The application allows users to create and manage tasks through a straightforward interface.
 
-Users can:
-- Create tasks
-- Track their progress
-- Stay organized in a clean dashboard interface
+Tasks can include descriptions, priorities, and due dates. Users can update completion status, delete tasks, and filter their task list.
 
-The app focuses on simplicity, usability, and clean UI rather than unnecessary complexity.
+The app separates the user interface from its data management logic.
 
----
+On supported native platforms, task data is stored using Expo SQLite. On the web, a platform-specific storage implementation uses browser localStorage.
 
-## 🧪 Installation & Setup
+The native storage implementation also includes an in-memory fallback if SQLite initialization fails.
+
+## Installation and Setup
+
+**Requirements:** Node.js and npm.
 
 Clone the repository:
 
@@ -73,42 +81,46 @@ Install dependencies:
 npm install
 ```
 
-Run the development server:
+Start the Expo development server:
 
 ```bash
-npm run dev
+npm start
 ```
 
----
+Run the web version:
 
+```bash
+npm run web
+```
 
-## 💡 Future Improvements
+To work with native platforms, use the appropriate Expo development environment.
 
-- Task categories / tags
-- User authentication
-- Backend integration (database)
-- Drag-and-drop task sorting
+## Technical Highlights
 
----
+This project demonstrates:
 
-## 👨‍💻 Author
+- Component-based application architecture
+- TypeScript interfaces and type definitions
+- React state management
+- File-based navigation with Expo Router
+- Asynchronous local data operations
+- Platform-specific storage implementations
+- Task filtering and progress calculations
+- Reusable UI components
 
-**Sergey Onoprichuk**  
-Full-Stack Web Developer  
+## Potential Future Improvements
 
----
+- User accounts and authentication
+- Cloud synchronization across devices
+- Task categories and tags
+- Drag-and-drop task organization
+- Notifications and reminders
+- Automated testing
 
-## 📬 Contact
+## Author
 
-📧 hello@onoprichukwebstudio.com  
-🌐 https://onoprichukwebstudio.com/
+**Sergey Onoprichuk**
 
----
+Web Development Graduate | Cybersecurity Student
 
-## ⭐ Notes
-
-This project was built to demonstrate:
-- React component structure
-- TypeScript usage
-- Clean UI/UX design
-- Real-world frontend development skills
+[GitHub Profile](https://github.com/OnoprichukSergey-FS)
